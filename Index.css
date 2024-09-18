@@ -54,12 +54,72 @@ header {
         margin: 0 0;
     }
     
+
+
+    .div-central{
+        
+        height: 289px;
+
+    }
+
+    #div-leyenda{
+
+        width: 50%;
+        height: 100%;
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    #div-mapa{
+
+        width: 50%;
+        height: 100%;
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     footer{
         background-color: #d9e1e6;
         opacity: 0.85;
         width: 100%;
-        height: 140px;
+        height: 10px;
         display: grid;
         grid-template-areas: 
         ". . . ."
