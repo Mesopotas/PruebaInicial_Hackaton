@@ -54,6 +54,22 @@ header {
         margin: 0 0;
     }
 
+    #div-mapa{
+
+        margin-left: 40%;
+
+    }
+
+    #mapa{
+    
+        margin-top: 50px;
+        margin-bottom: 50px;
+        display:flex;
+
+    }
+
+    
+
 
 
 
