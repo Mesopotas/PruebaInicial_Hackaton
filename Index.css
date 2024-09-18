@@ -53,61 +53,6 @@ header {
         background-color: #ffffff;
         margin: 0 0;
     }
-    
-
-
-    .div-central{
-        
-        height: 289px;
-
-    }
-
-    #div-leyenda{
-
-        width: 50%;
-        height: 100%;
-
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    #div-mapa{
-
-        width: 50%;
-        height: 100%;
-
-    }
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -127,56 +72,5 @@ header {
         ". . . .";
         grid-template-columns: 33% 33% 25% 10%;
         
-    }
-    
-    footer h2{
-        font-size: large;
-        font-weight: bold;
-    }
-    
-    .company{
-        grid-area: company;
-        margin-left: 20px;
-    }
-    
-    .materials{
-        grid-area: materials;
-    }
-    
-    .client-area{
-        grid-area: client-area;
-    }
-    
-    footer .icons{
-        grid-area: icons;
-        margin-right: 20px;
-        display: grid;
-        grid-template-areas: 
-        ". logo ."
-        "linkedin instagram pinterest";
-        grid-template-columns: 33% 33% 33%;
-        justify-items: center;
-    
-    }
-    
-    footer .icons .logo{
-        grid-area: logo;
-        width: 100%;
-        height: 80%;
-    }
-    
-    .linkedin{
-        width: 40px;
-        grid-area: linkedin;
-    }
-    
-    .instagram{
-        width: 40px;
-        grid-area: instagram;
-    }
-    
-    .pinterest{
-        width: 40px;
-        grid-area: pinterest;
     }
     
