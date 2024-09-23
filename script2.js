@@ -7,6 +7,26 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
 }).addTo(map);
 
+// Mapa de asociaciones entre categorías y nombres de archivos de imágenes
+const categoryToImage = {
+    'Drought': 'drough.png',
+    'Dust and Haze': 'dustandhaze.png',
+    'Earthquake': 'earthquake.png',
+    'Floods': 'floods.png',
+    'Landslide': 'landslide.png',
+    'Manmade': 'manmade.png',
+    'Sea and Ice Lakes': 'seaandicelakes.png',
+    'Storm': 'storm.png',
+    'Snow': 'snow.png',
+    'Temperature': 'temperature.png',
+    'Volcano': 'volcano.png',
+    'Watercolor': 'watercolor.png',
+    'Wildfire': 'wildfire.png'
+};
+
+// URL de la imagen personalizada para los puntos
+const customImageUrl = 'https://images.emojiterra.com/google/android-11/512px/1f525.png';
+
 // Función para obtener los datos de la API de EONET
 async function fetchEvents(startDate = null, endDate = null) {
     try {
@@ -40,13 +60,24 @@ async function fetchEvents(startDate = null, endDate = null) {
             const title = event.title;
             const category = event.categories[0].title;
             const coordinates = event.geometry[0].coordinates;
-            
+
             // Verifica si las coordenadas están en el formato [longitud, latitud]
             if (coordinates.length === 2) {
                 const [lng, lat] = coordinates; // Leaflet usa [lat, lng]
                 
-                // Agrega un marcador al mapa
-                L.marker([lat, lng])
+                // Obtiene la imagen correspondiente a la categoría del evento
+                const imageUrl = categoryToImage[category] ? `IMG/${categoryToImage[category]}` : customImageUrl;
+                
+                // Crea un ícono personalizado con la imagen
+                const icon = L.icon({
+                    iconUrl: imageUrl,
+                    iconSize: [32, 32], // Ajusta el tamaño del ícono según sea necesario
+                    iconAnchor: [16, 32], // Ajusta el ancla del ícono
+                    popupAnchor: [0, -32] // Ajusta el ancla del popup
+                });
+                
+                // Agrega un marcador al mapa con el ícono personalizado
+                L.marker([lat, lng], { icon })
                     .addTo(map)
                     .bindPopup(`<strong>${title}</strong><br>Category: ${category}`);
             }
