@@ -75,6 +75,82 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
 }).addTo(map);
 
+// Diccionario para asignar íconos personalizados según la categoría del evento
+const eventIcons = {
+    'Drought': L.icon({
+        iconUrl: './IMG/drought.png',
+        iconSize: [32, 32], // Tamaño del icono
+        iconAnchor: [16, 32], // Punto del icono que se ubicará en el marcador
+        popupAnchor: [0, -32] // Ajuste para el pop-up
+    }),
+    'Dust and Haze': L.icon({
+        iconUrl: './IMG/dustandhaze.png',
+        iconSize: [32, 32], // Tamaño del icono
+        iconAnchor: [16, 32], // Punto del icono que se ubicará en el marcador
+        popupAnchor: [0, -32] // Ajuste para el pop-up
+    }),
+    'Earthquakes': L.icon({
+        iconUrl: './IMG/earthquake.png',
+        iconSize: [32, 32], // Tamaño del icono
+        iconAnchor: [16, 32], // Punto del icono que se ubicará en el marcador
+        popupAnchor: [0, -32] // Ajuste para el pop-up
+    }),
+    'Floods': L.icon({
+        iconUrl: './IMG/floods.png',
+        iconSize: [32, 32], // Tamaño del icono
+        iconAnchor: [16, 32], // Punto del icono que se ubicará en el marcador
+        popupAnchor: [0, -32] // Ajuste para el pop-up
+    }),
+    'Landslides': L.icon({
+        iconUrl: './IMG/landslide.png',
+        iconSize: [32, 32], // Tamaño del icono
+        iconAnchor: [16, 32], // Punto del icono que se ubicará en el marcador
+        popupAnchor: [0, -32] // Ajuste para el pop-up
+    }),
+    'Manmade': L.icon({
+        iconUrl: './IMG/manmade.png',
+        iconSize: [32, 32], // Tamaño del icono
+        iconAnchor: [16, 32], // Punto del icono que se ubicará en el marcador
+        popupAnchor: [0, -32] // Ajuste para el pop-up
+    }),
+    'Sea and Lake Ice': L.icon({
+        iconUrl: './IMG/seaandicelakes.png',
+        iconSize: [32, 32], // Tamaño del icono
+        iconAnchor: [16, 32], // Punto del icono que se ubicará en el marcador
+        popupAnchor: [0, -32] // Ajuste para el pop-up
+    }),
+    'Severe Storms': L.icon({
+        iconUrl: './IMG/storm.png',
+        iconSize: [32, 32], // Tamaño del icono
+        iconAnchor: [16, 32], // Punto del icono que se ubicará en el marcador
+        popupAnchor: [0, -32] // Ajuste para el pop-up
+    }),
+    'Temperature Extremes': L.icon({
+        iconUrl: './IMG/temperature.png',
+        iconSize: [32, 32], // Tamaño del icono
+        iconAnchor: [16, 32], // Punto del icono que se ubicará en el marcador
+        popupAnchor: [0, -32] // Ajuste para el pop-up
+    }),
+    'Volcanoes': L.icon({
+        iconUrl: './IMG/volcano.png',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+    }),
+    'Water Color': L.icon({
+        iconUrl: './IMG/watercolo.png',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+    }),
+    'Wildfires': L.icon({
+        iconUrl: './IMG/wildfire.png',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+    }),
+};
+
 // Función para obtener los datos de la API de EONET
 async function fetchEvents() {
     try {
@@ -96,9 +172,17 @@ async function fetchEvents() {
             // Verifica si las coordenadas están en el formato [longitud, latitud]
             if (coordinates.length === 2) {
                 const [lng, lat] = coordinates; // Leaflet usa [lat, lng]
-                
-                // Agrega un marcador al mapa
-                L.marker([lat, lng])
+
+                // Usa el ícono personalizado según la categoría del evento, o un ícono por defecto
+                const icon = eventIcons[category] || L.icon({
+                    iconUrl: './IMG/default.png', // Usa un ícono por defecto si no se encuentra la categoría
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 32],
+                    popupAnchor: [0, -32]
+                });
+
+                // Agrega un marcador con el ícono personalizado
+                L.marker([lat, lng], { icon: icon })
                     .addTo(map)
                     .bindPopup(`<strong>${title}</strong><br>Category: ${category}`);
             }
