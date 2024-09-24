@@ -151,40 +151,72 @@ const eventIcons = {
     }),
 };
 
-// Función para obtener los datos de la API de EONET
-async function fetchEvents() {
+// Variable para almacenar los marcadores del mapa
+let markers = [];
+
+// Función para limpiar los marcadores del mapa
+function clearMarkers() {
+    markers.forEach(marker => map.removeLayer(marker));
+    markers = [];
+}
+
+// Función para obtener eventos filtrados por fecha
+async function fetchEvents(startDate = null, endDate = null) {
     try {
         const response = await fetch('https://eonet.gsfc.nasa.gov/api/v3/events');
         const data = await response.json();
 
         // Filtra eventos con coordenadas disponibles
-        const eventsWithCoordinates = data.events.filter(event => 
+        const eventsWithCoordinates = data.events.filter(event =>
             event.geometry && event.geometry.length > 0 &&
             event.geometry[0].coordinates.length >= 2
         );
 
+        // Si se proporcionan fechas, filtrar eventos por rango de fechas
+        const filteredEvents = eventsWithCoordinates.filter(event => {
+            const eventDate = new Date(event.geometry[0].date);
+
+            if (startDate && endDate) {
+                // Filtra entre las dos fechas proporcionadas
+                return eventDate >= new Date(startDate) && eventDate <= new Date(endDate);
+            } else if (startDate) {
+                // Filtra eventos a partir de la fecha de inicio
+                return eventDate >= new Date(startDate);
+            } else if (endDate) {
+                // Filtra eventos hasta la fecha de fin
+                return eventDate <= new Date(endDate);
+            }
+
+            return true; // Si no hay fechas, devuelve todos los eventos
+        });
+
         // Procesa los eventos y los añade al mapa
-        eventsWithCoordinates.forEach(event => {
+        clearMarkers(); // Limpiar los marcadores previos
+
+        filteredEvents.forEach(event => {
             const title = event.title;
             const category = event.categories[0].title;
             const coordinates = event.geometry[0].coordinates;
-            
-            // Verifica si las coordenadas están en el formato [longitud, latitud]
+            const eventDate = new Date(event.geometry[0].date).toLocaleDateString();
+
             if (coordinates.length === 2) {
-                const [lng, lat] = coordinates; // Leaflet usa [lat, lng]
+                const [lng, lat] = coordinates;
 
                 // Usa el ícono personalizado según la categoría del evento, o un ícono por defecto
                 const icon = eventIcons[category] || L.icon({
-                    iconUrl: './IMG/default.png', // Usa un ícono por defecto si no se encuentra la categoría
+                    iconUrl: './IMG/default.png',
                     iconSize: [32, 32],
                     iconAnchor: [16, 32],
                     popupAnchor: [0, -32]
                 });
 
                 // Agrega un marcador con el ícono personalizado
-                L.marker([lat, lng], { icon: icon })
+                const marker = L.marker([lat, lng], { icon: icon })
                     .addTo(map)
-                    .bindPopup(`<strong>${title}</strong><br>Category: ${category}`);
+                    .bindPopup(`<strong>${title}</strong><br>Category: ${category}<br>Date: ${eventDate}`);
+                
+                // Guarda el marcador en la lista para luego poder eliminarlo
+                markers.push(marker);
             }
         });
     } catch (error) {
@@ -192,5 +224,20 @@ async function fetchEvents() {
     }
 }
 
-// Llama a la función para cargar los eventos
+// Agregar el evento "submit" para filtrar los eventos por fechas
+document.getElementById('date-filter').addEventListener('submit', function(event) {
+    event.preventDefault();
+    
+    const startDate = document.getElementById('start-date').value;
+    const endDate = document.getElementById('end-date').value;
+
+    // Realiza la búsqueda solo si al menos uno de los campos de fecha está completado
+    if (startDate || endDate) {
+        fetchEvents(startDate, endDate);
+    } else {
+        alert('Por favor, selecciona al menos una fecha.');
+    }
+});
+
+// Cargar los eventos al inicio sin filtrar por fechas
 fetchEvents();
