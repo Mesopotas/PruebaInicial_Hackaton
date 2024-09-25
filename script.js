@@ -1,69 +1,104 @@
-/*const categoryList = document.getElementById('category-list');
+/*
+const map = L.map('map').setView([20, 0], 2);
 
-async function fetchCategories() {
+// Agrega un mapa base desde OpenStreetMap
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: '© OpenStreetMap contributors'
+}).addTo(map);
+
+// Diccionario para asignar íconos personalizados según la categoría del evento
+const eventIcons = {
+    'Drought': L.icon({ iconUrl: './IMG/drought.png', iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -32] }),
+    'Dust and Haze': L.icon({ iconUrl: './IMG/dustandhaze.png', iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -32] }),
+    'Earthquakes': L.icon({ iconUrl: './IMG/earthquake.png', iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -32] }),
+    'Floods': L.icon({ iconUrl: './IMG/floods.png', iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -32] }),
+    // Agrega más categorías según sea necesario
+};
+
+let markers = [];
+
+// Función para limpiar los marcadores del mapa
+function clearMarkers() {
+    markers.forEach(marker => map.removeLayer(marker));
+    markers = [];
+}
+
+// Función para obtener el clima
+async function fetchWeather(lat, lon) {
+    const apiKey = '4d3d3efc4f8402b61207aaa2b39dd6be';
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+    
     try {
-        const response = await fetch('https://eonet.gsfc.nasa.gov/api/v3/categories');
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Error al obtener el clima');
         const data = await response.json();
-
-        displayCategories(data.categories);
+        return {
+            temperature: data.main.temp,
+            description: data.weather[0].description
+        };
     } catch (error) {
-        console.error('Error fetching data from NASA API:', error);
+        console.error(error);
+        return null; // Retorna null si hay un error
     }
 }
 
-function displayCategories(categories) {
-    categoryList.innerHTML = ''; // Limpiar la lista antes de agregar nuevas categorías
-    categories.forEach(category => {
-        const li = document.createElement('li');
-        li.textContent = category.title; // Mostrar el nombre de la categoría
-        categoryList.appendChild(li);
-    });
-}
-
-fetchCategories(); // Llamar a la función para cargar las categorías al cargar la página
-
-
-const eventTableBody = document.querySelector('#event-table tbody');
-
-async function fetchEvents() {
+// Función para obtener eventos filtrados por fecha
+async function fetchEvents(startDate = null, endDate = null) {
     try {
         const response = await fetch('https://eonet.gsfc.nasa.gov/api/v3/events');
         const data = await response.json();
 
-        // Mostrar los 5 eventos más recientes
-        displayEvents(data.events.slice(0, 5));
+        // Filtra eventos con coordenadas disponibles
+        const eventsWithCoordinates = data.events.filter(event =>
+            event.geometry && event.geometry.length > 0 &&
+            event.geometry[0].coordinates.length >= 2
+        );
+
+        clearMarkers(); // Limpiar los marcadores previos
+
+        for (const event of eventsWithCoordinates) {
+            const coordinates = event.geometry[0].coordinates;
+            const [lon, lat] = coordinates;
+
+            // Obtener clima para las coordenadas
+            const weather = await fetchWeather(lat, lon);
+
+            const title = event.title;
+            const category = event.categories[0].title;
+            const eventDate = new Date(event.geometry[0].date).toLocaleDateString();
+            const weatherInfo = weather ? `Temperatura: ${weather.temperature}°C, Clima: ${weather.description}` : 'Clima no disponible';
+
+            if (coordinates.length === 2) {
+                const icon = eventIcons[category] || L.icon({ iconUrl: './IMG/default.png', iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -32] });
+
+                const marker = L.marker([lat, lon], { icon: icon })
+                    .addTo(map)
+                    .bindPopup(`<strong>${title}</strong><br>Category: ${category}<br>Date: ${eventDate}<br>${weatherInfo}`);
+                
+                markers.push(marker);
+            }
+        }
     } catch (error) {
-        console.error('Error fetching data from NASA API:', error);
+        console.error('Error fetching events:', error);
     }
 }
 
-function displayEvents(events) {
-    eventTableBody.innerHTML = ''; // Limpiar las filas antes de agregar nuevos eventos
+// Agregar el evento "submit" para filtrar los eventos por fechas
+document.getElementById('date-filter').addEventListener('submit', function(event) {
+    event.preventDefault();
+    
+    const startDate = document.getElementById('start-date').value;
+    const endDate = document.getElementById('end-date').value;
 
-    events.forEach(event => {
-        const row = document.createElement('tr');
-        
-        const titleCell = document.createElement('td');
-        const categoryCell = document.createElement('td');
-        const coordinatesCell = document.createElement('td');
+    if (startDate || endDate) {
+        fetchEvents(startDate, endDate);
+    } else {
+        alert('Por favor, selecciona al menos una fecha.');
+    }
+});
 
-        titleCell.textContent = event.title;
-        categoryCell.textContent = event.categories[0].title;
-        
-        if (event.geometry && event.geometry.length > 0) {
-            const coords = event.geometry[0].coordinates;
-            coordinatesCell.textContent = `Latitud: ${coords[1]}, Longitud: ${coords[0]}`;
-        } else {
-            coordinatesCell.textContent = 'No disponibles';
-        }
-
-        row.appendChild(titleCell);
-        row.appendChild(categoryCell);
-        row.appendChild(coordinatesCell);
-        eventTableBody.appendChild(row);
-    });
-}
-
+// Cargar los eventos al inicio sin filtrar por fechas
 fetchEvents();*/
 
 
@@ -79,57 +114,57 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 const eventIcons = {
     'Drought': L.icon({
         iconUrl: './IMG/drought.png',
-        iconSize: [32, 32], // Tamaño del icono
-        iconAnchor: [16, 32], // Punto del icono que se ubicará en el marcador
-        popupAnchor: [0, -32] // Ajuste para el pop-up
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
     }),
     'Dust and Haze': L.icon({
         iconUrl: './IMG/dustandhaze.png',
-        iconSize: [32, 32], // Tamaño del icono
-        iconAnchor: [16, 32], // Punto del icono que se ubicará en el marcador
-        popupAnchor: [0, -32] // Ajuste para el pop-up
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
     }),
     'Earthquakes': L.icon({
         iconUrl: './IMG/earthquake.png',
-        iconSize: [32, 32], // Tamaño del icono
-        iconAnchor: [16, 32], // Punto del icono que se ubicará en el marcador
-        popupAnchor: [0, -32] // Ajuste para el pop-up
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
     }),
     'Floods': L.icon({
         iconUrl: './IMG/floods.png',
-        iconSize: [32, 32], // Tamaño del icono
-        iconAnchor: [16, 32], // Punto del icono que se ubicará en el marcador
-        popupAnchor: [0, -32] // Ajuste para el pop-up
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
     }),
     'Landslides': L.icon({
         iconUrl: './IMG/landslide.png',
-        iconSize: [32, 32], // Tamaño del icono
-        iconAnchor: [16, 32], // Punto del icono que se ubicará en el marcador
-        popupAnchor: [0, -32] // Ajuste para el pop-up
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
     }),
     'Manmade': L.icon({
         iconUrl: './IMG/manmade.png',
-        iconSize: [32, 32], // Tamaño del icono
-        iconAnchor: [16, 32], // Punto del icono que se ubicará en el marcador
-        popupAnchor: [0, -32] // Ajuste para el pop-up
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
     }),
     'Sea and Lake Ice': L.icon({
         iconUrl: './IMG/seaandicelakes.png',
-        iconSize: [32, 32], // Tamaño del icono
-        iconAnchor: [16, 32], // Punto del icono que se ubicará en el marcador
-        popupAnchor: [0, -32] // Ajuste para el pop-up
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
     }),
     'Severe Storms': L.icon({
         iconUrl: './IMG/storm.png',
-        iconSize: [32, 32], // Tamaño del icono
-        iconAnchor: [16, 32], // Punto del icono que se ubicará en el marcador
-        popupAnchor: [0, -32] // Ajuste para el pop-up
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
     }),
     'Temperature Extremes': L.icon({
         iconUrl: './IMG/temperature.png',
-        iconSize: [32, 32], // Tamaño del icono
-        iconAnchor: [16, 32], // Punto del icono que se ubicará en el marcador
-        popupAnchor: [0, -32] // Ajuste para el pop-up
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
     }),
     'Volcanoes': L.icon({
         iconUrl: './IMG/volcano.png',
@@ -160,49 +195,56 @@ function clearMarkers() {
     markers = [];
 }
 
+// Función para obtener el clima de una ubicación
+async function fetchWeather(lat, lon) {
+    const apiKey = '4d3d3efc4f8402b61207aaa2b39dd6be';
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        return `${data.weather[0].description}, ${data.main.temp} °C`;
+    } catch (error) {
+        console.error('Error fetching weather data:', error);
+        return 'No weather data available';
+    }
+}
+
 // Función para obtener eventos filtrados por fecha
 async function fetchEvents(startDate = null, endDate = null) {
     try {
         const response = await fetch('https://eonet.gsfc.nasa.gov/api/v3/events');
         const data = await response.json();
 
-        // Filtra eventos con coordenadas disponibles
         const eventsWithCoordinates = data.events.filter(event =>
             event.geometry && event.geometry.length > 0 &&
             event.geometry[0].coordinates.length >= 2
         );
 
-        // Si se proporcionan fechas, filtrar eventos por rango de fechas
         const filteredEvents = eventsWithCoordinates.filter(event => {
             const eventDate = new Date(event.geometry[0].date);
 
             if (startDate && endDate) {
-                // Filtra entre las dos fechas proporcionadas
                 return eventDate >= new Date(startDate) && eventDate <= new Date(endDate);
             } else if (startDate) {
-                // Filtra eventos a partir de la fecha de inicio
                 return eventDate >= new Date(startDate);
             } else if (endDate) {
-                // Filtra eventos hasta la fecha de fin
                 return eventDate <= new Date(endDate);
             }
 
-            return true; // Si no hay fechas, devuelve todos los eventos
+            return true;
         });
 
-        // Procesa los eventos y los añade al mapa
-        clearMarkers(); // Limpiar los marcadores previos
+        clearMarkers();
 
-        filteredEvents.forEach(event => {
+        for (const event of filteredEvents) {
             const title = event.title;
             const category = event.categories[0].title;
             const coordinates = event.geometry[0].coordinates;
-            const eventDate = new Date(event.geometry[0].date).toLocaleDateString();
 
             if (coordinates.length === 2) {
-                const [lng, lat] = coordinates;
+                const [lon, lat] = coordinates;
 
-                // Usa el ícono personalizado según la categoría del evento, o un ícono por defecto
                 const icon = eventIcons[category] || L.icon({
                     iconUrl: './IMG/default.png',
                     iconSize: [32, 32],
@@ -210,15 +252,16 @@ async function fetchEvents(startDate = null, endDate = null) {
                     popupAnchor: [0, -32]
                 });
 
-                // Agrega un marcador con el ícono personalizado
-                const marker = L.marker([lat, lng], { icon: icon })
-                    .addTo(map)
-                    .bindPopup(`<strong>${title}</strong><br>Category: ${category}<br>Date: ${eventDate}`);
+                // Crear el marcador
+                const marker = L.marker([lat, lon], { icon: icon }).addTo(map);
                 
-                // Guarda el marcador en la lista para luego poder eliminarlo
+                // Obtener el clima y agregarlo al popup
+                const weatherInfo = await fetchWeather(lat, lon);
+                marker.bindPopup(`<strong>${title}</strong><br>Category: ${category}<br>Weather: ${weatherInfo}`);
+                
                 markers.push(marker);
             }
-        });
+        }
     } catch (error) {
         console.error('Error fetching events:', error);
     }
@@ -231,7 +274,6 @@ document.getElementById('date-filter').addEventListener('submit', function(event
     const startDate = document.getElementById('start-date').value;
     const endDate = document.getElementById('end-date').value;
 
-    // Realiza la búsqueda solo si al menos uno de los campos de fecha está completado
     if (startDate || endDate) {
         fetchEvents(startDate, endDate);
     } else {
