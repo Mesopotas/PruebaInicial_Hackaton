@@ -66,13 +66,45 @@ function displayEvents(events) {
 
 fetchEvents();*/
 
-
-const map = L.map('map').setView([20, 0], 2);
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+// Cambia el nombre de las variables relacionadas con los mapas base y overlays
+const baseLayerMapOSM = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
     attribution: '© OpenStreetMap contributors'
-}).addTo(map);
+});
+
+const baseLayerMapOSMHOT = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap contributors, Tiles style by Humanitarian OpenStreetMap Team hosted by OpenStreetMap France'
+});
+
+const baseLayerOpenTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: 'Map data: © OpenStreetMap contributors, SRTM | Map style: © OpenTopoMap (CC-BY-SA)'
+});
+
+// Inicializa el mapa usando la vista general
+const mapInteractiveNaturalEvents = L.map('map', {
+    center: [20, 0],
+    zoom: 2,
+    layers: [baseLayerMapOSM] // Capa base por defecto
+});
+
+// Renombra las variables para los controles de capas
+const baseMapsLayerControl = {
+    "OpenStreetMap": baseLayerMapOSM,
+    "OpenStreetMap.HOT": baseLayerMapOSMHOT,
+    "OpenTopoMap": baseLayerOpenTopoMap
+};
+
+// Continúa utilizando el mismo conjunto de eventos como overlay
+const overlayNaturalEventMarkers = {
+    "Eventos Naturales": L.layerGroup()
+};
+
+// Añadir control de capas con opciones base y overlays
+L.control.layers(baseMapsLayerControl, overlayNaturalEventMarkers).addTo(mapInteractiveNaturalEvents);
+
+// Resto del código para gestionar los eventos, filtros, etc.
 
 const eventIcons = {
     'Drought': './IMG/drought.png',
@@ -89,19 +121,19 @@ const eventIcons = {
     'Wildfires': './IMG/wildfire.png',
 };
 
-let markers = [];
-let activeFilters = new Set();  // Almacena los eventos activos
+let markersArray = [];
+let activeEventFilters = new Set();  // Almacena los eventos activos
 
 // Función para agregar las opciones del filtro con checkbox y las imágenes de los eventos
-function addEventFilterOptions(events) {
+function addEventFilterOptionsToForm(events) {
     const eventFilterDiv = document.getElementById('event-filter');
 
     // Limpiar las opciones previas
     eventFilterDiv.innerHTML = '';
 
-    const uniqueCategories = [...new Set(events.map(event => event.categories[0].title))];
+    const uniqueEventCategories = [...new Set(events.map(event => event.categories[0].title))];
 
-    uniqueCategories.forEach(category => {
+    uniqueEventCategories.forEach(category => {
         const label = document.createElement('label');
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
@@ -111,11 +143,11 @@ function addEventFilterOptions(events) {
         // Evento para filtrar los marcadores cuando el checkbox cambia
         checkbox.addEventListener('change', function() {
             if (this.checked) {
-                activeFilters.add(this.value);
+                activeEventFilters.add(this.value);
             } else {
-                activeFilters.delete(this.value);
+                activeEventFilters.delete(this.value);
             }
-            updateMarkers();
+            updateMapMarkers();
         });
 
         // Imagen correspondiente a la categoría
@@ -133,28 +165,28 @@ function addEventFilterOptions(events) {
         eventFilterDiv.appendChild(document.createElement('br'));
 
         // Inicialmente activa todos los filtros
-        activeFilters.add(category);
+        activeEventFilters.add(category);
     });
 }
 
 // Función para actualizar los marcadores según los filtros activos
-function updateMarkers() {
-    clearMarkers();  // Eliminar todos los marcadores
+function updateMapMarkers() {
+    clearMapMarkers();  // Eliminar todos los marcadores
 
-    markers.forEach(markerObj => {
-        if (activeFilters.has(markerObj.category)) {
-            markerObj.marker.addTo(map);  // Añadir marcador al mapa si está filtrado
+    markersArray.forEach(markerObj => {
+        if (activeEventFilters.has(markerObj.category)) {
+            markerObj.marker.addTo(mapInteractiveNaturalEvents);  // Añadir marcador al mapa si está filtrado
         }
     });
 }
 
 // Función para limpiar los marcadores del mapa
-function clearMarkers() {
-    markers.forEach(markerObj => map.removeLayer(markerObj.marker));
+function clearMapMarkers() {
+    markersArray.forEach(markerObj => mapInteractiveNaturalEvents.removeLayer(markerObj.marker));
 }
 
 // Función para obtener los eventos y agregar marcadores
-async function fetchEvents() {
+async function fetchAndDisplayNaturalEvents() {
     try {
         const response = await fetch('https://eonet.gsfc.nasa.gov/api/v3/events');
         const data = await response.json();
@@ -166,7 +198,7 @@ async function fetchEvents() {
         );
 
         // Añadir las opciones del filtro
-        addEventFilterOptions(eventsWithCoordinates);
+        addEventFilterOptionsToForm(eventsWithCoordinates);
 
         // Añadir los eventos al mapa
         eventsWithCoordinates.forEach(event => {
@@ -191,15 +223,15 @@ async function fetchEvents() {
                     .bindPopup(`<strong>${title}</strong><br>Category: ${category}<br>Date: ${eventDate}`);
 
                 // Almacena el marcador y su categoría
-                markers.push({ marker, category });
+                markersArray.push({ marker, category });
             }
         });
 
         // Inicialmente, muestra todos los marcadores
-        updateMarkers();
+        updateMapMarkers();
     } catch (error) {
         console.error('Error fetching events:', error);
     }
 }
 
-fetchEvents();
+fetchAndDisplayNaturalEvents();
