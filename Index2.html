@@ -5,38 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mapa Interactivo de Eventos Naturales</title>
-    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="Index.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <style>
-        /* Estilos básicos para el mapa y el contenedor */
-        #map {
-            height: 70vh;
-            width: 100%;
-            margin: 0 auto;
-            border: 2px solid #ccc;
-            border-radius: 10px;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center; 
-            margin: 0;
-        }
-        h1 {
-            margin: 20px 0;
-        }
-        form {
-            margin-bottom: 20px;
-        }
-        label, input {
-            margin: 5px;
-        }
-    </style>
+
 </head>
 <body>
-    <h1>Mapa Interactivo de Eventos Naturales</h1>
-    
+
     <form id="date-filter">
         <label for="start-date">Fecha de inicio:</label>
         <input type="date" id="start-date" name="start-date">
@@ -48,16 +22,13 @@
     <form id="event-filter-form">
         <label for="event-filter">Filtrar eventos:</label>
         <div id="event-filter">
-            <!-- Las opciones de los eventos se agregarán dinámicamente aquí -->
         </div>
     </form>
     
 
     <div id="map"></div>
 
-    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <!-- Script Principal -->
     <script src="script.js"></script>
 </body>
 </html>

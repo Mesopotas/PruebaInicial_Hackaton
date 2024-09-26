@@ -2,13 +2,11 @@
 
 const map = L.map('map').setView([20, 0], 2);
 
-// Agrega un mapa base desde OpenStreetMap
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
     attribution: '© OpenStreetMap contributors'
 }).addTo(map);
 
-// Diccionario para asignar íconos personalizados según la categoría del evento
 const eventIcons = {
     'Drought': L.icon({
         iconUrl: './IMG/drought.png',
@@ -84,16 +82,12 @@ const eventIcons = {
     }),
 };
 
-// Variable para almacenar los marcadores del mapa
 let markers = [];
-
-// Función para limpiar los marcadores del mapa
 function clearMarkers() {
     markers.forEach(marker => map.removeLayer(marker));
     markers = [];
 }
 
-// Función para obtener el clima de una ubicación
 async function fetchWeather(lat, lon) {
     const apiKey = '4d3d3efc4f8402b61207aaa2b39dd6be';
     const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
@@ -108,7 +102,6 @@ async function fetchWeather(lat, lon) {
     }
 }
 
-// Función para obtener eventos filtrados por fecha
 async function fetchEvents(startDate = null, endDate = null) {
     try {
         const response = await fetch('https://eonet.gsfc.nasa.gov/api/v3/events');
@@ -150,10 +143,8 @@ async function fetchEvents(startDate = null, endDate = null) {
                     popupAnchor: [0, -32]
                 });
 
-                // Crear el marcador
                 const marker = L.marker([lat, lon], { icon: icon }).addTo(map);
                 
-                // Obtener el clima y agregarlo al popup
                 const weatherInfo = await fetchWeather(lat, lon);
                 marker.bindPopup(`<strong>${title}</strong><br>Category: ${category}<br>Weather: ${weatherInfo}`);
                 
@@ -165,7 +156,6 @@ async function fetchEvents(startDate = null, endDate = null) {
     }
 }
 
-// Agregar el evento "submit" para filtrar los eventos por fechas
 document.getElementById('date-filter').addEventListener('submit', function(event) {
     event.preventDefault();
     
@@ -179,5 +169,4 @@ document.getElementById('date-filter').addEventListener('submit', function(event
     }
 });
 
-// Cargar los eventos al inicio sin filtrar por fechas
 fetchEvents();
