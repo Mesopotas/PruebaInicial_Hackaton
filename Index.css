@@ -1,27 +1,68 @@
+body{
+    background-image: url(./IMG/Estrellas.jpeg);
+}
+
 #map {
     height: 70vh;
     width: 100%;
-    margin: 0 auto;
     border: 2px solid #ccc;
     border-radius: 10px;
     margin: 10px;
+    margin-bottom: 50px;
 }
 
+#imagen-header{
+
+    float: left;
+    text-align: center;
+
+}
 
 #header{
 
-    background-color: blue;
+    background-color: rgba(6, 90, 185, 0.705);
     text-align: center;
     color: white;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center; 
+    
+}
 
+#filtrado-fechas{
+
+    padding-top: 50px;
+    padding-bottom: 50px;
+    margin-left:500px ;
+    margin-right: 500px;
+    margin-top: 25px;
+    margin-bottom: 25px;
+    border-radius: 25px
+    ;
+    align-content: center;
+    background-color: rgba(0, 0, 0, 0.349);
+    color: white;
+}
+
+#date-filter{
+    text-align: center;
 }
 
 h1 {
     margin: 20px 0;
 }
-form {
-    margin-bottom: 20px;
+
+#div-map{
+
+    padding-left: 300px;
+    padding-right: 300px;
+
 }
-label, input {
-    margin: 5px;
+
+#fecha-finalizacion{
+
+    padding-left: 15px;
+
 }

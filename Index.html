@@ -11,22 +11,35 @@
 </head>
 <body>
 
-    <form id="date-filter">
-        <label for="start-date">Fecha de inicio:</label>
-        <input type="date" id="start-date" name="start-date">
-        <label for="end-date">Fecha de fin:</label>
-        <input type="date" id="end-date" name="end-date">
-        <button type="submit">Filtrar</button>
-    </form>
+    <header id="header">
 
+        <img id="imagen-header" src="./IMG/logonasa.png" width="90px" height="90px">
+        <h1>NASA SPACE</h1> 
+
+    </header>
+
+    <div id="filtrado-fechas">
+        <form id="date-filter">
+            <label for="start-date">Fecha de inicio:</label>
+            <input type="date" id="start-date" name="start-date">
+            <label id="fecha-finalizacion" for="end-date">Fecha de fin:</label>
+            <input type="date" id="end-date" name="end-date"><br><br>
+            <button type="submit">Filtrar</button>
+        </form>
+    </div>
+
+    <!--
     <form id="event-filter-form">
         <label for="event-filter">Filtrar eventos:</label>
         <div id="event-filter">
         </div>
     </form>
-    
+    -->
 
-    <div id="map"></div>
+    <div id="div-map">
+        <div id="map"></div>
+    </div>
+
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="script.js"></script>
